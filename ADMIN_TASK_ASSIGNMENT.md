@@ -104,20 +104,20 @@ $table->enum('role', ['user', 'admin'])->default('user')->after('email');
 ## Testing
 
 ### Test Admin Features:
-1. Login as admin (john@example.com / password)
+1. Login as admin (rajesh.kumar@example.com / password)
 2. Create a task and assign it to another user
 3. Verify you can see all tasks
 4. Verify you can update/delete any task
 
 ### Test Regular User Features:
-1. Login as regular user (jane@example.com / password)
+1. Login as regular user (priya.sharma@example.com / password)
 2. Create a task (should be auto-assigned to you)
 3. Verify you only see your own tasks
 4. Verify you cannot access other users' tasks
 
 ## Default Admin User
 
-- **Email**: john@example.com
+- **Email**: rajesh.kumar@example.com
 - **Password**: password
 - **Role**: admin
 
