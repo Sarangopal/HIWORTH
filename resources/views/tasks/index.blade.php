@@ -60,6 +60,9 @@
                         <tr>
                             <th>Title</th>
                             <th>Description</th>
+                            @if(Auth::user()->isAdmin())
+                            <th>Assigned To</th>
+                            @endif
                             <th>Status</th>
                             <th>Created</th>
                             <th class="text-end">Actions</th>
@@ -70,10 +73,32 @@
                             <tr>
                                 <td>
                                     <strong>{{ $task->title }}</strong>
+                                    @if($task->creator && $task->creator->id !== Auth::id())
+                                        <br><small class="text-muted">
+                                            <i class="bi bi-person-plus me-1"></i>Assigned to you by {{ $task->creator->name }}
+                                        </small>
+                                    @elseif($task->creator && $task->creator->id === Auth::id())
+                                        <br><small class="text-success">
+                                            <i class="bi bi-check-circle me-1"></i>Created by you
+                                        </small>
+                                    @endif
                                 </td>
                                 <td>
                                     <span class="text-muted">{{ Str::limit($task->description ?? 'No description', 40) }}</span>
                                 </td>
+                                @if(Auth::user()->isAdmin())
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle me-2" style="width: 32px; height: 32px; background: #007bff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                                            {{ strtoupper(substr($task->user->name, 0, 1)) }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">{{ $task->user->name }}</div>
+                                            <small class="text-muted">{{ $task->user->email }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                @endif
                                 <td>
                                     <form action="{{ route('tasks.updateStatus', $task) }}" method="POST" class="d-inline">
                                         @csrf

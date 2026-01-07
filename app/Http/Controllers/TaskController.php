@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Task;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -14,10 +15,16 @@ class TaskController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        // Users can only see their own tasks
-        $tasks = Task::where('user_id', Auth::id())
-            ->with('user')
-            ->get();
+        $user = Auth::user();
+        
+        // Admins can see all tasks, regular users only see their own
+        if ($user->isAdmin()) {
+            $tasks = Task::with('user')->get();
+        } else {
+            $tasks = Task::where('user_id', $user->id)
+                ->with('user')
+                ->get();
+        }
 
         return response()->json($tasks);
     }
@@ -27,24 +34,41 @@ class TaskController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        $user = Auth::user();
+        $assignToUserId = $request->input('user_id');
+        
+        // Admins can assign to any user, regular users can only assign to themselves
+        if ($user->isAdmin() && $assignToUserId) {
+            $targetUserId = $assignToUserId;
+            // Validate that the user exists
+            User::findOrFail($targetUserId);
+        } else {
+            // Regular users always assign to themselves
+            $targetUserId = $user->id;
+        }
+
         $validated = $request->validate([
             'title' => [
                 'required',
                 'string',
                 'max:255',
-                'unique:tasks,title,NULL,id,user_id,' . Auth::id(),
+                'unique:tasks,title,NULL,id,user_id,' . $targetUserId,
             ],
             'description' => 'nullable|string',
             'status' => 'nullable|in:pending,in_progress,completed',
+            'user_id' => $user->isAdmin() ? 'nullable|exists:users,id' : 'nullable',
         ], [
-            'title.unique' => 'You already have a task with this title. Please choose a different title.',
+            'title.unique' => 'This user already has a task with this title. Please choose a different title.',
+            'user_id.exists' => 'Selected user does not exist.',
         ]);
 
-        // Automatically assign task to authenticated user
-        $validated['user_id'] = Auth::id();
+        // Assign task to the selected user (or current user for regular users)
+        $validated['user_id'] = $targetUserId;
+        // Track who created the task
+        $validated['created_by'] = $user->id;
 
         $task = Task::create($validated);
-        $task->load('user');
+        $task->load(['user', 'creator']);
 
         return response()->json($task, 201);
     }
@@ -54,8 +78,10 @@ class TaskController extends Controller
      */
     public function show(Task $task): JsonResponse
     {
-        // Check authorization - user can only view their own tasks
-        if ($task->user_id !== Auth::id()) {
+        $user = Auth::user();
+        
+        // Admins can view any task, regular users can only view their own
+        if (!$user->isAdmin() && $task->user_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -68,8 +94,10 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task): JsonResponse
     {
-        // Check authorization - user can only update their own tasks
-        if ($task->user_id !== Auth::id()) {
+        $user = Auth::user();
+        
+        // Admins can update any task, regular users can only update their own
+        if (!$user->isAdmin() && $task->user_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -97,8 +125,10 @@ class TaskController extends Controller
      */
     public function updateStatus(Request $request, Task $task): JsonResponse
     {
-        // Check authorization - user can only update their own tasks
-        if ($task->user_id !== Auth::id()) {
+        $user = Auth::user();
+        
+        // Admins can update any task, regular users can only update their own
+        if (!$user->isAdmin() && $task->user_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -117,8 +147,10 @@ class TaskController extends Controller
      */
     public function destroy(Task $task): JsonResponse
     {
-        // Check authorization - user can only delete their own tasks
-        if ($task->user_id !== Auth::id()) {
+        $user = Auth::user();
+        
+        // Admins can delete any task, regular users can only delete their own
+        if (!$user->isAdmin() && $task->user_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 

@@ -16,6 +16,7 @@ class Task extends Model
      */
     protected $fillable = [
         'user_id',
+        'created_by',
         'title',
         'description',
         'status',
@@ -27,5 +28,13 @@ class Task extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the user who created the task.
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

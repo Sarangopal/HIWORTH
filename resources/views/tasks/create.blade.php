@@ -21,6 +21,31 @@
                     @csrf
                     
                     <div class="row">
+                        @if(Auth::user()->isAdmin() && $users)
+                        <div class="col-md-12 mb-3">
+                            <label for="user_id" class="form-label">
+                                <i class="bi bi-person me-1"></i>Assign To User
+                            </label>
+                            <select class="form-select @error('user_id') is-invalid @enderror" 
+                                    id="user_id" 
+                                    name="user_id">
+                                <option value="">Select a user (optional - defaults to you)</option>
+                                @foreach($users as $user)
+                                    <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
+                                        {{ $user->name }} ({{ $user->email }})
+                                        @if($user->isAdmin())
+                                            <span class="badge bg-primary">Admin</span>
+                                        @endif
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('user_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="form-text text-muted">As an admin, you can assign this task to any user.</small>
+                        </div>
+                        @endif
+
                         <div class="col-md-12 mb-3">
                             <label for="title" class="form-label">
                                 <i class="bi bi-card-heading me-1"></i>Task Title

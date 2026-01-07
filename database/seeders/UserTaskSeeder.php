@@ -14,22 +14,23 @@ class UserTaskSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create sample users
+        // Create sample users with Indian names
         $user1 = User::create([
-            'name' => 'John Doe',
-            'email' => 'john@example.com',
+            'name' => 'Rajesh Kumar',
+            'email' => 'rajesh.kumar@example.com',
             'password' => Hash::make('password'),
+            'role' => 'admin', // Admin user
         ]);
 
         $user2 = User::create([
-            'name' => 'Jane Smith',
-            'email' => 'jane@example.com',
+            'name' => 'Priya Sharma',
+            'email' => 'priya.sharma@example.com',
             'password' => Hash::make('password'),
         ]);
 
         $user3 = User::create([
-            'name' => 'Bob Johnson',
-            'email' => 'bob@example.com',
+            'name' => 'Anjali Desai',
+            'email' => 'anjali.desai@example.com',
             'password' => Hash::make('password'),
         ]);
 

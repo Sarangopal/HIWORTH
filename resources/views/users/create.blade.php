@@ -53,7 +53,7 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-12 mb-4">
+                        <div class="col-md-12 mb-3">
                             <label for="password" class="form-label">
                                 <i class="bi bi-lock me-1"></i>Password
                             </label>
@@ -68,6 +68,28 @@
                             @enderror
                             <small class="form-text text-muted">Password must be at least 8 characters long.</small>
                         </div>
+
+                        @if(Auth::user()->isAdmin())
+                        <div class="col-md-12 mb-4">
+                            <label for="role" class="form-label">
+                                <i class="bi bi-shield-check me-1"></i>Role
+                            </label>
+                            <select class="form-select @error('role') is-invalid @enderror" 
+                                    id="role" 
+                                    name="role">
+                                <option value="user" {{ old('role') === 'user' ? 'selected' : '' }}>
+                                    👤 User
+                                </option>
+                                <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>
+                                    👑 Admin
+                                </option>
+                            </select>
+                            @error('role')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="form-text text-muted">Admins can assign tasks to other users.</small>
+                        </div>
+                        @endif
                     </div>
 
                     <div class="d-flex gap-2 justify-content-end">

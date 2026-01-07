@@ -60,6 +60,11 @@
                         
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
+                                @if($user->isAdmin())
+                                <span class="badge bg-warning text-dark me-2">
+                                    <i class="bi bi-shield-check me-1"></i>Admin
+                                </span>
+                                @endif
                                 <span class="badge bg-primary">
                                     <i class="bi bi-list-task me-1"></i>{{ $user->tasks_count }} Tasks
                                 </span>

@@ -33,6 +33,16 @@
                         <span>My Tasks</span>
                     </a>
                 </div>
+                @auth
+                    @if(Auth::user()->isAdmin())
+                        <div class="nav-item">
+                            <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                                <i class="bi bi-people"></i>
+                                <span>Users</span>
+                            </a>
+                        </div>
+                    @endif
+                @endauth
             </nav>
             <div class="sidebar-footer">
                 <div class="user-info">
@@ -65,12 +75,6 @@
                 </div>
                 <div class="d-flex align-items-center gap-3">
                     @yield('header-actions')
-                    <form action="{{ route('logout') }}" method="POST" class="d-none d-md-block">
-                        @csrf
-                        <button type="submit" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-box-arrow-right me-2"></i>Logout
-                        </button>
-                    </form>
                 </div>
             </div>
 

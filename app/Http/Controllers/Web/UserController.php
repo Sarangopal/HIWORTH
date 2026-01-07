@@ -36,7 +36,15 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8',
+            'role' => 'nullable|in:user,admin',
         ]);
+
+        // Only admins can set roles, default to 'user' for regular users
+        if (!auth()->user()->isAdmin()) {
+            $validated['role'] = 'user';
+        } else {
+            $validated['role'] = $validated['role'] ?? 'user';
+        }
 
         User::create($validated);
 
@@ -48,8 +56,8 @@ class UserController extends Controller
      */
     public function show(User $user): View
     {
-        // Users can only view their own profile
-        if ($user->id !== auth()->id()) {
+        // Users can only view their own profile, unless they are an admin
+        if (auth()->user()->isUser() && $user->id !== auth()->id()) {
             abort(403, 'Unauthorized access.');
         }
 
